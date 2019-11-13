@@ -1,8 +1,15 @@
 ﻿import { applyMiddleware, combineReducers, compose, createStore } from 'redux';
 import thunk from 'redux-thunk';
-import { routerReducer, routerMiddleware } from 'react-router-redux';
+import { connectRouter, routerMiddleware } from 'connected-react-router';
 import * as Counter from './Counter';
 import * as WeatherForecasts from './WeatherForecasts';
+import { createBrowserHistory } from 'history';
+
+
+// Create browser history to use in the Redux store
+const baseUrl = document.getElementsByTagName('base')[0].getAttribute('href');
+export const history = createBrowserHistory({ basename: baseUrl });
+
 
 export default function configureStore(history, initialState) {
   const reducers = {
@@ -24,7 +31,7 @@ export default function configureStore(history, initialState) {
 
   const rootReducer = combineReducers({
     ...reducers,
-    routing: routerReducer
+    router: connectRouter(history)
   });
 
   return createStore(
