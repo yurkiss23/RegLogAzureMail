@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using RegLogAzureMail.Entities;
 using RegLogAzureMail.Helpers;
@@ -22,14 +25,20 @@ namespace RegLogAzureMail.Controllers
         private readonly EFDbContext _context;
         private readonly UserManager<DbUser> _userManager;
         private readonly SignInManager<DbUser> _signInManager;
+        private readonly IEmailSender _emailSender;
+        private readonly IConfiguration _configuration;
 
         public AccountController(EFDbContext context,
          UserManager<DbUser> userManager,
-         SignInManager<DbUser> signInManager)
+         SignInManager<DbUser> signInManager,
+         IConfiguration configuration,
+         IEmailSender emailSender)
         {
             _userManager = userManager;
             _context = context;
             _signInManager = signInManager;
+            _emailSender = emailSender;
+            _configuration = configuration;
         }
 
         [HttpPost("login")]
@@ -80,13 +89,28 @@ namespace RegLogAzureMail.Controllers
             {
                 return BadRequest(result.Errors);
             }
-            await _signInManager.SignInAsync(user, isPersistent: false);
 
-            return Ok(
-            new
-            {
-                token = CreateTokenJwt(user)
-            });
+            string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            var frontEndURL = _configuration.GetValue<string>("FrontEndURL");
+
+            var callbackUrl =
+                $"{frontEndURL}/confirmemail?userId={user.Id}&" +
+                $"code={WebUtility.UrlEncode(code)}";
+
+            await _emailSender.SendEmailAsync(model.Email, "Confirm Email",
+               $"Please confirm your email by clicking here: " +
+               $"<a href='{callbackUrl}'>link</a>");
+
+            return Ok("SEMEN");
+
+            //await _signInManager.SignInAsync(user, isPersistent: false);
+
+            //return Ok(
+            //new
+            //{
+            //    token = CreateTokenJwt(user)
+            //});
         }
 
 
@@ -113,6 +137,29 @@ namespace RegLogAzureMail.Controllers
                 expires: DateTime.Now.AddHours(1));
 
             return new JwtSecurityTokenHandler().WriteToken(jwt);
+        }
+
+        [HttpPost("confirmemail/{userid}")]
+        //[AllowAnonymous]
+        public async Task<IActionResult> ConfirmEmail(string userid, [FromBody]ConfirmEmailViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errrors = CustomValidator.GetErrorsByModel(ModelState);
+                return BadRequest(errrors);
+            }
+            var user = await _userManager.FindByIdAsync(userid);
+            if (user == null)
+            {
+                return BadRequest(new { invalid = "User is not found" });
+            }
+            var result = await _userManager.ConfirmEmailAsync(user, model.Code);
+            if (!result.Succeeded)
+            {
+                var errrors = CustomValidator.GetErrorsByIdentityResult(result);
+                return BadRequest(errrors);
+            }
+            return Ok();
         }
     }
 }

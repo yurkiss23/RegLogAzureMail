@@ -25,4 +25,10 @@ namespace RegLogAzureMail.ViewModels
         [Required(ErrorMessage = "Поле не може бути пустим!")]
         public string PasswordConfirm { get; set; }
     }
+
+    public class ConfirmEmailViewModel
+    {
+        [Required(ErrorMessage = "Cant't be empty")]
+        public string Code { get; set; }
+    }
 }

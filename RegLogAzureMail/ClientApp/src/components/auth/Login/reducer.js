@@ -1,5 +1,5 @@
-import loginService from './loginService';
-import { push } from 'connected-react-router';
+//import loginService from './loginService';
+//import { push } from 'connected-react-router';
 
 export const REGISTER_STARTED = "user/REGISTER_STARTED";
 export const REGISTER_SUCCESS = "user/REGISTER_SUCCESS";

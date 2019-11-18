@@ -5,6 +5,7 @@ import * as Counter from './Counter';
 import * as WeatherForecasts from './WeatherForecasts';
 import { createBrowserHistory } from 'history';
 import {registerReducer} from '../components/auth/Register/reducer';
+import {confirmEmailReducer} from '../components/auth/ConfirmEmail/reducer';
 import {loginReducer} from '../components/auth/Login/reducer';
 
 
@@ -18,6 +19,7 @@ export default function configureStore(history, initialState) {
     counter: Counter.reducer,
     weatherForecasts: WeatherForecasts.reducer,
     register: registerReducer,
+    confirmEmail: confirmEmailReducer,
     login: loginReducer
   };
 
