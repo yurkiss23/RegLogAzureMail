@@ -7,6 +7,7 @@ import FetchData from './components/FetchData';
 import RegisterPage from './components/auth/Register';
 import ConfirmEmailPage from './components/auth/ConfirmEmail';
 import LoginPage from './components/auth/Login';
+import CabinetPage from './components/Cabinet/CabinetPage';
 
 export default () => (
   <Layout>
@@ -16,5 +17,6 @@ export default () => (
     <Route path='/register' component={RegisterPage}/>
     <Route path='/confirmemail' component={ConfirmEmailPage}/>
     <Route path='/login' component={LoginPage}/>
+    <Route path='/cabinet' component={CabinetPage}/>
   </Layout>
 );

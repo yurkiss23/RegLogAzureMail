@@ -49,7 +49,7 @@ export const confirmEmailUser = (model) => {
             {
                 console.log('Server message', response.data);
                 dispatch({type: CONFIRMEMAIL_SUCCESS});
-                dispatch(push('/'));
+                dispatch(push('/login'));
             }, err => {
                 dispatch({type: CONFIRMEMAIL_FAILED, servErrors: err.response.data});
                 console.log('Server problen in controler message', err.response.data);
